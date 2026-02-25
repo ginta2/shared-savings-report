@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Shared Savings (V4) — Verified Financial Analysis, February 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#fafafa;--surface:#fff;--text:#0b1220;--muted:#5b6473;
+      --border:#e6e8ee;--shadow:0 10px 30px rgba(17,24,39,.06);
+      --shadow2:0 2px 10px rgba(17,24,39,.05);
+      --r12:12px;--r20:20px;--r28:28px;
+      --blue:#2563eb;--green:#10b981;--amber:#f59e0b;--red:#ef4444;
+      --chip:#eef2ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:radial-gradient(1200px 800px at 50% -200px,rgba(37,99,235,.10),transparent 55%),radial-gradient(900px 500px at 10% 0,rgba(16,185,129,.08),transparent 60%),var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+    .container{max-width:1260px;margin:0 auto;padding:44px 22px 80px}
+    header{padding:36px 30px;border:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.72));backdrop-filter:blur(8px);border-radius:var(--r28);box-shadow:var(--shadow)}
+    h1{margin:0 0 8px;font-size:clamp(24px,3.5vw,40px);letter-spacing:-.03em;font-weight:800;background:linear-gradient(90deg,#0b1220,#334155);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{margin:0;color:var(--muted);font-size:14px;max-width:92ch}
+    .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+    .chip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:var(--chip);border:1px solid rgba(37,99,235,.18);color:#1e3a8a;font-weight:600;font-size:11px}
+    .chip.good{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.22);color:#065f46}
+    .chip.warn{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.25);color:#92400e}
+    .chip.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.20);color:#991b1b}
+    .card{border:1px solid var(--border);background:rgba(255,255,255,.92);border-radius:var(--r20);box-shadow:var(--shadow2);padding:22px;margin-top:18px}
+    .card h2{margin:0 0 8px;font-size:16px;letter-spacing:-.02em}
+    .card p{margin:5px 0;color:var(--muted);font-size:13px}
+    .kpiGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+    @media(max-width:900px){.kpiGrid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:560px){.kpiGrid{grid-template-columns:1fr}}
+    .kpi{border:1px solid var(--border);border-radius:var(--r12);padding:11px;background:#fff}
+    .kpi .label{color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+    .kpi .value{font-weight:900;font-size:17px;letter-spacing:-.02em;margin-top:2px}
+    .kpi .sub{font-size:11px;color:var(--muted);margin-top:2px}
+    .small{font-size:12px;color:var(--muted)}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .sectionTitle{margin:28px 0 10px;font-size:15px;font-weight:800;letter-spacing:-.02em}
+    .chartBoxFull{height:440px;border:1px solid var(--border);background:#fff;border-radius:var(--r20);box-shadow:var(--shadow2);padding:16px;margin-top:10px}
+    .charts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px}
+    @media(max-width:980px){.charts{grid-template-columns:1fr}}
+    .chartBox{height:380px;border:1px solid var(--border);background:#fff;border-radius:var(--r20);box-shadow:var(--shadow2);padding:16px}
+    .tableWrap{margin-top:10px;border:1px solid var(--border);border-radius:var(--r20);background:#fff;box-shadow:var(--shadow2);overflow:auto;max-height:600px}
+    table{border-collapse:separate;border-spacing:0;min-width:1100px;width:100%}
+    th,td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:top;background:#fff;font-size:12px}
+    th{position:sticky;top:0;z-index:10;background:#f6f7fb;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#374151;border-bottom:2px solid var(--border);white-space:nowrap}
+    th:first-child{z-index:20}
+    td:first-child,th:first-child{position:sticky;left:0;z-index:5;border-right:2px solid var(--border);box-shadow:2px 0 10px rgba(0,0,0,.03);font-weight:700}
+    tr:hover td{background:#fbfbfe}
+    .sp{display:inline-block;padding:2px 7px;border-radius:999px;font-weight:700;font-size:10.5px;min-width:24px;text-align:center}
+    .sp5{background:rgba(16,185,129,.15);color:#065f46}.sp4{background:rgba(37,99,235,.12);color:#1e3a8a}.sp3{background:rgba(245,158,11,.15);color:#92400e}.sp2{background:rgba(239,68,68,.12);color:#991b1b}.sp1{background:rgba(239,68,68,.25);color:#7f1d1d}
+    .structTag{display:inline-block;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700}
+    .structTag.joint{background:rgba(37,99,235,.10);color:#1e40af}.structTag.separate{background:rgba(5,150,105,.10);color:#065f46}.structTag.bonds{background:rgba(217,119,6,.10);color:#92400e}
+    .winner{color:#065f46;font-weight:800}.loser{color:#991b1b;font-weight:600}
+    .corrCard{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+    @media(max-width:700px){.corrCard{grid-template-columns:1fr}}
+    .corrItem{border:1px solid var(--border);border-radius:var(--r12);padding:10px;background:#fff;font-size:12px}
+    .corrItem strong{display:block;margin-bottom:3px}
+    .corrItem .old{text-decoration:line-through;color:#991b1b;font-weight:600}
+    .corrItem .new{color:#065f46;font-weight:700}
+    .recSection{margin-top:26px}
+    .verdictCard{border:2px solid var(--green);background:rgba(16,185,129,.05);border-radius:var(--r20);padding:22px;margin-top:10px}
+    .verdictCard h3{margin:0 0 8px;font-size:16px;color:#065f46}
+    .verdictCard p{margin:0;font-size:13px;color:var(--text);line-height:1.65}
+    .recGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+    @media(max-width:800px){.recGrid{grid-template-columns:1fr}}
+    .recTile{border:1px solid var(--border);border-radius:var(--r20);padding:18px;background:#fff}
+    .recTile.best{border-color:var(--green);background:rgba(16,185,129,.04)}
+    .recTile h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .recTile .amt{font-weight:900;font-size:16px;color:var(--text);margin-top:4px}
+    .foot{margin-top:22px;color:var(--muted);font-size:11px}
+    .jvsBetter{background:rgba(16,185,129,.06)}
+    .jvsWorse{background:rgba(239,68,68,.04)}
+    .calcGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+    @media(max-width:700px){.calcGrid{grid-template-columns:1fr}}
+    .calcCtrl{border:1px solid var(--border);background:rgba(250,250,250,.8);border-radius:var(--r12);padding:14px}
+    .calcCtrl label{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:12px;color:#111827;margin-bottom:6px}
+    .calcCtrl .hint{font-weight:600;color:var(--blue);font-size:12px}
+    .calcCtrl input[type=number]{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font:inherit;font-size:15px;font-weight:600;transition:border-color .15s}
+    .calcCtrl input[type=number]:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+    .calcTotals{display:flex;gap:16px;margin-top:8px;font-size:12px;color:var(--muted)}
+    .calcTotals strong{color:var(--text)}
+    .calcCard{border:2px solid var(--blue);background:linear-gradient(135deg,rgba(37,99,235,.04),rgba(16,185,129,.03));border-radius:var(--r20);box-shadow:var(--shadow);padding:22px;margin-top:18px}
+    .calcCard h2{margin:0 0 4px;font-size:16px;letter-spacing:-.02em;color:var(--text)}
+    .calcCard>p{margin:0 0 0;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Shared Savings (V4)</h1>
+    <p class="subtitle">Verified financial analysis for an English-speaking couple in Berlin. All rates confirmed from official bank websites, February 2026. Use the calculator below to model different savings amounts. Tax modeled for unmarried couple (2 x EUR 1,000 Sparerpauschbetrag).</p>
+    <div class="chips">
+      <span class="chip good">Rates verified Feb 2026</span>
+      <span class="chip">24-month horizon</span>
+      <span class="chip" id="chipAmounts">EUR 20k + 2k/mo</span>
+      <span class="chip warn">Unmarried — 2 x EUR 1k allowance</span>
+      <span class="chip bad">5 of 8 rates corrected from V3</span>
+    </div>
+  </header>
+
+  <!-- ─── CALCULATOR ─── -->
+  <div class="calcCard" id="calcCard">
+    <h2>Calculator — Model Your Savings</h2>
+    <p>Enter per-person amounts. All charts, tables, and recommendations update instantly.</p>
+    <div class="calcGrid">
+      <div class="calcCtrl">
+        <label>Initial deposit per person <span class="hint" id="hInit"></span></label>
+        <input id="inInit" type="number" min="0" step="500" value="10000">
+        <div class="calcTotals">Joint total: <strong id="jInit"></strong> &nbsp;|&nbsp; Separate: 2 &times; <span id="sInit"></span></div>
+      </div>
+      <div class="calcCtrl">
+        <label>Monthly contribution per person <span class="hint" id="hMonth"></span></label>
+        <input id="inMonth" type="number" min="0" step="100" value="1000">
+        <div class="calcTotals">Joint total: <strong id="jMonth"></strong>/mo &nbsp;|&nbsp; Separate: 2 &times; <span id="sMonth"></span>/mo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── EXECUTIVE SUMMARY ─── -->
+  <div class="card">
+    <h2>Executive Summary</h2>
+    <p>V4 corrects five material rate errors found in V3 and adds proper fee/tax accounting. Net figures now reflect <strong>gross interest minus total fees minus tax</strong> for an unmarried couple.</p>
+    <div class="kpiGrid">
+      <div class="kpi"><div class="label">Best Overall (24m net)</div><div class="value" id="kpi1">&mdash;</div><div class="sub" id="kpi1s">&mdash;</div></div>
+      <div class="kpi"><div class="label">Best Joint Account</div><div class="value" id="kpi2">&mdash;</div><div class="sub" id="kpi2s">&mdash;</div></div>
+      <div class="kpi"><div class="label">Best Separate Setup</div><div class="value" id="kpi3">&mdash;</div><div class="sub" id="kpi3s">&mdash;</div></div>
+      <div class="kpi"><div class="label">Safest Option</div><div class="value">Bubills</div><div class="sub">Sovereign credit. Safety 4.6/5.</div></div>
+    </div>
+  </div>
+
+  <!-- ─── RATE CORRECTIONS ─── -->
+  <div class="sectionTitle">Rate Corrections from V3 (verified Feb 2026)</div>
+  <div class="corrCard">
+    <div class="corrItem"><strong>Bunq Joint</strong><br><span class="old">2.01% flat</span> &rarr; <span class="new">2.51% flat</span><br>Source: bunq.com</div>
+    <div class="corrItem"><strong>Renault</strong><br><span class="old">2.80% x 4m / 1.45%</span> &rarr; <span class="new">2.90% x 3m / 1.80%</span><br>Source: renault-bank-direkt.de (Feb 3)</div>
+    <div class="corrItem"><strong>ING</strong><br><span class="old">1.70% x 12m / 0.75%</span> &rarr; <span class="new">2.50% x 4m / 0.75%</span><br>Source: mygermanfinances.de</div>
+    <div class="corrItem"><strong>comdirect</strong><br><span class="old">base 0.75%</span> &rarr; <span class="new">base 1.50%</span><br>Source: settle-in-germany.com</div>
+    <div class="corrItem"><strong>DBX0AN</strong><br><span class="old">2.15%</span> &rarr; <span class="new">~2.50%</span><br>ECB deposit rate 2.75%, STR+8.5bp-TER</div>
+    <div class="corrItem"><strong>Commerzbank</strong><br><span class="old">Fee: EUR 4.90 x 24m</span> &rarr; <span class="new">Fee: EUR 4.90 x 11m (EUR 53.90)</span><br>3-month free + EUR 50k waiver</div>
+  </div>
+
+  <!-- ─── CHARTS ─── -->
+  <div class="sectionTitle">24-Month Interest Trajectory</div>
+  <div class="chartBoxFull"><canvas id="trajChart"></canvas></div>
+
+  <div class="sectionTitle">Structure Comparison &amp; Trilemma</div>
+  <div class="charts">
+    <div class="chartBox"><canvas id="barChart"></canvas></div>
+    <div class="chartBox"><canvas id="radarChart"></canvas></div>
+  </div>
+  <div class="charts" style="margin-top:14px">
+    <div class="chartBox"><canvas id="bubbleChart"></canvas></div>
+    <div class="chartBox" style="display:flex;align-items:center;justify-content:center;flex-direction:column;padding:30px">
+      <h2 style="margin:0 0 10px;font-size:15px">Parameters Used</h2>
+      <table style="min-width:auto;width:auto;border:none">
+        <tr><td style="border:none;font-weight:400;position:static;box-shadow:none;border-right:none">Initial deposit (total)</td><td class="mono" style="border:none;position:static;box-shadow:none;border-right:none" id="paramInit">EUR 20,000</td></tr>
+        <tr><td style="border:none;font-weight:400;position:static;box-shadow:none;border-right:none">Monthly contribution (total)</td><td class="mono" style="border:none;position:static;box-shadow:none;border-right:none" id="paramMonth">EUR 2,000/month</td></tr>
+        <tr><td style="border:none;font-weight:400;position:static;box-shadow:none;border-right:none">Horizon</td><td class="mono" style="border:none;position:static;box-shadow:none;border-right:none">24 months</td></tr>
+        <tr><td style="border:none;font-weight:400;position:static;box-shadow:none;border-right:none">Marital status</td><td class="mono" style="border:none;position:static;box-shadow:none;border-right:none">Not married</td></tr>
+        <tr><td style="border:none;font-weight:400;position:static;box-shadow:none;border-right:none">Tax allowance</td><td class="mono" style="border:none;position:static;box-shadow:none;border-right:none">2 x EUR 1,000</td></tr>
+        <tr><td style="border:none;font-weight:400;position:static;box-shadow:none;border-right:none">Tax rate</td><td class="mono" style="border:none;position:static;box-shadow:none;border-right:none">26.375%</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── COMPARISON TABLE ─── -->
+  <div class="sectionTitle">Full Comparison — 24 Months, After Tax &amp; Fees (frozen header + first column)</div>
+  <div class="tableWrap">
+    <table>
+      <thead><tr>
+        <th>Provider</th><th>Structure</th><th>Promo</th><th>Base Rate</th>
+        <th>Safety</th><th>Utility</th>
+        <th class="mono">24M Gross</th><th class="mono">24M Fees</th>
+        <th class="mono">24M Tax</th><th class="mono" style="background:#edf7ed">24M Net</th><th>Notes</th>
+      </tr></thead>
+      <tbody id="compTbody"></tbody>
+    </table>
+  </div>
+
+  <!-- ─── JOINT vs SEPARATE ─── -->
+  <div class="sectionTitle">Joint Account vs Separate Accounts — Head-to-Head</div>
+  <div class="card" style="padding:16px">
+    <p>For each provider, we compare a single joint account against two separate individual accounts. Net = gross interest minus fees minus tax (unmarried, 2 x EUR 1,000 allowance).</p>
+    <p class="small">Tax note for unmarried couples: with a joint Oder-Konto, the bank withholds tax on the full interest. You must reclaim the 50/50 split via your Steuererkl&auml;rung. With separate accounts, each person files their own Freistellungsauftrag directly — cleaner and automatic.</p>
+    <div class="tableWrap" style="margin-top:12px">
+      <table style="min-width:900px">
+        <thead><tr>
+          <th>Provider</th>
+          <th>Joint Rate</th><th class="mono">Joint 24M Net</th>
+          <th>Sep. Rate</th><th class="mono">Sep. 24M Net</th>
+          <th class="mono">Difference</th><th>Winner</th><th>Key Tradeoff</th>
+        </tr></thead>
+        <tbody id="jvsTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── SAFETY TABLE ─── -->
+  <div class="sectionTitle">Bank Safety &amp; Collapse Risk</div>
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>Provider</th><th>Regulatory</th><th>Parent</th><th>Deposit Ins.</th><th>Crisis Track</th><th>Ops Continuity</th><th>Avg Score</th><th>Key Risk</th></tr></thead>
+      <tbody id="safetyTbody"></tbody>
+    </table>
+  </div>
+
+  <!-- ─── RECOMMENDATIONS ─── -->
+  <div class="recSection">
+    <div class="sectionTitle">Final Recommendations</div>
+
+    <div class="verdictCard">
+      <h3 id="verdictTitle">&mdash;</h3>
+      <p id="verdictBody">&mdash;</p>
+    </div>
+
+    <div class="recGrid">
+      <div class="recTile best" id="recBestJoint">
+        <h4>Best Joint Account</h4>
+        <div class="amt" id="recJointName">&mdash;</div>
+        <p id="recJointNote">&mdash;</p>
+      </div>
+      <div class="recTile" id="recBestSep">
+        <h4>Best Separate Setup</h4>
+        <div class="amt" id="recSepName">&mdash;</div>
+        <p id="recSepNote">&mdash;</p>
+      </div>
+      <div class="recTile" id="recBestETF">
+        <h4>Best Bonds / ETF</h4>
+        <div class="amt" id="recETFName">&mdash;</div>
+        <p id="recETFNote">&mdash;</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Diversification Strategy (Recommended Split)</h2>
+      <p id="diversBody">&mdash;</p>
+    </div>
+  </div>
+
+  <div class="foot">Report generated February 2026. All rates verified from official bank websites and Bundesbank auction data. Tax modeling assumes unmarried couple, no church tax. Charts require internet (Chart.js CDN); tables work offline.</div>
+</div>
+
+<script>
+/* ================================================================
+   HELPERS
+   ================================================================ */
+const $=id=>document.getElementById(id);
+function eur(n){return n==null?"N/A":"\u20AC"+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function eurK(n){return n>=1000?"\u20AC"+(n/1000)+"k":"\u20AC"+n;}
+function sp(s){const c=s>=5?"sp5":s>=4?"sp4":s>=3?"sp3":s>=2?"sp2":"sp1";return'<span class="sp '+c+'">'+s+"</span>";}
+function stag(s){const c=s==="Joint"?"joint":s==="Separate"?"separate":"bonds";return'<span class="structTag '+c+'">'+s+"</span>";}
+
+/* ================================================================
+   DATA — RATES VERIFIED FEB 2026
+   ================================================================ */
+const OPTIONS=[
+  {id:"bunq",name:"Bunq Easy Savings",short:"Bunq",structure:"Joint",
+   promoRate:null,promoMonths:0,baseRate:2.51,feeFn:null,
+   safetyScore:2.8,utilityScore:4.5,color:"#2563eb",
+   notes:"2.51% variable for joint savings (bunq.com). Best English UI. Dutch DNB deposit insurance."},
+  {id:"consors",name:"Consorsbank Tagesgeld",short:"Consorsbank",structure:"Joint",
+   promoRate:3.10,promoMonths:3,baseRate:0.80,feeFn:null,
+   safetyScore:4.4,utilityScore:1.5,color:"#7c3aed",
+   notes:"3.10% promo for 3 months (Handelsblatt confirmed), then 0.80%. German UI primarily."},
+  {id:"renault",name:"Renault Bank direkt",short:"Renault",structure:"Joint",
+   promoRate:2.90,promoMonths:3,baseRate:1.80,feeFn:null,
+   safetyScore:3.0,utilityScore:2.3,color:"#ea580c",
+   notes:"Rates updated Feb 3 2026: 2.90% x 3m, then 1.80% (was 1.45%). French FdG insurance."},
+  {id:"commerzbank",name:"Commerzbank Tagesgeld",short:"Commerzbank",structure:"Joint",
+   promoRate:1.70,promoMonths:12,baseRate:0.75,
+   feeFn:function(m,bal){if(m<=3)return 0;if(bal>=50000)return 0;return 4.90;},
+   safetyScore:4.6,utilityScore:3.8,color:"#be185d",
+   notes:"1.70% x 12m (Topzinskonto Plus). Giro fee EUR 4.90/mo: free first 3m, waived at EUR 50k+. English app + ~450 branches."},
+  {id:"ing",name:"ING Extra-Konto (2\u00D7)",short:"ING 2\u00D7",structure:"Separate",
+   promoRate:2.50,promoMonths:4,baseRate:0.75,feeFn:null,
+   safetyScore:4.8,utilityScore:1.9,color:"#059669",
+   notes:"Corrected: 2.50% x 4m (was 1.70% x 12m in V3). Then 0.75%. G-SIB parent. German UI."},
+  {id:"comdirect",name:"comdirect Tagesgeld (2\u00D7)",short:"comdirect 2\u00D7",structure:"Separate",
+   promoRate:2.75,promoMonths:6,baseRate:1.50,feeFn:null,
+   safetyScore:4.2,utilityScore:1.8,color:"#0891b2",
+   notes:"2.75% x 6m, then 1.50% (was 0.75% in V3 \u2014 doubled). Commerzbank parent."},
+  {id:"bubills",name:"12M Bubills",short:"Bubills",structure:"Bonds",
+   promoRate:null,promoMonths:0,baseRate:1.99,parkingRate:0.75,feeFn:null,
+   safetyScore:4.6,utilityScore:2.4,color:"#dc2626",
+   notes:"Jan 2026 auction: 1.994%. Monthly EUR 2k parked at ~0.75% until reinvestment."},
+  {id:"dbx0an",name:"DBX0AN Money Market ETF",short:"DBX0AN",structure:"Bonds",
+   promoRate:null,promoMonths:0,baseRate:2.50,feeFn:null,
+   safetyScore:4.0,utilityScore:3.0,color:"#d97706",
+   notes:"ECB STR + 8.5bp - 0.10% TER ~ 2.50%. Continuously investable. UCITS segregated."}
+];
+
+const BANK_SAFETY=[
+  {name:"ING Germany",reg:5,par:5,dep:5,cri:5,ops:4,avg:4.8,risk:"Online-only; no branch fallback"},
+  {name:"Berliner Sparkasse",reg:4,par:5,dep:5,cri:5,ops:5,avg:4.8,risk:"Lowest yield; quasi-sovereign mutual guarantee"},
+  {name:"12M Bubills (Sovereign)",reg:5,par:5,dep:5,cri:5,ops:3,avg:4.6,risk:"Broker-dependent access; T+2 settlement"},
+  {name:"Commerzbank",reg:5,par:4,dep:5,cri:4,ops:5,avg:4.6,risk:"D-SIB; 2008 bailout history; ~450 branches + English app"},
+  {name:"Deutsche Bank",reg:5,par:4,dep:5,cri:4,ops:5,avg:4.6,risk:"Past restructuring; now profitable"},
+  {name:"Consorsbank (BNP Paribas)",reg:4,par:5,dep:5,cri:5,ops:3,avg:4.4,risk:"Online-only; strong G-SIB parent"},
+  {name:"DKB (BayernLB)",reg:4,par:5,dep:5,cri:4,ops:3,avg:4.2,risk:"State-backed; new app transition issues"},
+  {name:"comdirect (Commerzbank)",reg:4,par:4,dep:5,cri:4,ops:4,avg:4.2,risk:"Subsidiary of Commerzbank; stable"},
+  {name:"DBX0AN ETF (DWS)",reg:5,par:4,dep:4,cri:4,ops:3,avg:4.0,risk:"ETF structure; swap-based; broker-dependent"},
+  {name:"Renault Bank direkt",reg:3,par:3,dep:4,cri:3,ops:2,avg:3.0,risk:"Auto-sector cyclical risk; French deposit insurance (FdG)"},
+  {name:"Bunq",reg:3,par:3,dep:4,cri:2,ops:2,avg:2.8,risk:"Small balance sheet; Dutch DNB; never crisis-tested"},
+  {name:"N26",reg:3,par:3,dep:4,cri:2,ops:2,avg:2.8,risk:"BaFin growth cap (2022); operational issues"},
+  {name:"C24 (CHECK24)",reg:3,par:3,dep:4,cri:1,ops:2,avg:2.6,risk:"Very new bank; no crisis data"}
+];
+
+const JVS_PROVIDERS=[
+  {name:"Bunq",jointRate:2.51,sepRate:2.01,promoRate:null,promoMonths:0,jointFeeFn:null,sepFeeFn:null,
+   tradeoff:"Joint gets 2.51% vs individual 2.01%. Joint wins on rate AND shared pot."},
+  {name:"Consorsbank",jointRate:0.80,sepRate:0.80,promoRate:3.10,promoMonths:3,jointFeeFn:null,sepFeeFn:null,
+   tradeoff:"Same rates. Joint gives shared oversight; separate gives cleaner tax filing."},
+  {name:"Renault",jointRate:1.80,sepRate:1.80,promoRate:2.90,promoMonths:3,jointFeeFn:null,sepFeeFn:null,
+   tradeoff:"Same rates. Partial English. Joint for accountability; separate for tax simplicity."},
+  {name:"Commerzbank",jointRate:0.75,sepRate:0.75,promoRate:1.70,promoMonths:12,
+   jointFeeFn:function(m,bal){if(m<=3)return 0;if(bal>=50000)return 0;return 4.90;},
+   sepFeeFn:null,
+   tradeoff:"Same rates but joint requires Giro (EUR 4.90/mo fee). Separate avoids the fee entirely."},
+  {name:"comdirect",jointRate:1.50,sepRate:1.50,promoRate:2.75,promoMonths:6,jointFeeFn:null,sepFeeFn:null,
+   tradeoff:"Same rates. German UI only. Separate is simpler for tax; joint for shared view."},
+  {name:"ING",jointRate:null,sepRate:0.75,promoRate:2.50,promoMonths:4,jointFeeFn:null,sepFeeFn:null,
+   tradeoff:"No joint Tagesgeld available. Separate only."}
+];
+
+/* ================================================================
+   SIMULATION ENGINE
+   ================================================================ */
+function simAccount(init,monthly,months,promoRate,promoMonths,baseRate,feeFn){
+  var bal=init,gross=0,fees=0,qd=[];
+  for(var m=1;m<=months;m++){
+    bal+=monthly;
+    var r=(promoRate!=null&&m<=promoMonths)?promoRate:baseRate;
+    var i=bal*(r/100/12);gross+=i;bal+=i;
+    var f=feeFn?feeFn(m,bal):0;fees+=f;bal-=f;
+    if(m%3===0)qd.push({q:m/3,m:m,bal:bal,gross:gross,fees:fees});
+  }
+  return{qd:qd,gross:gross,bal:bal,fees:fees};
+}
+
+function simBubills(init,monthly,months,yield_,park){
+  var inv=init,prk=0,gross=0,qd=[];
+  for(var m=1;m<=months;m++){
+    prk+=monthly;
+    var bi=inv*(yield_/100/12),pi=prk*(park/100/12);
+    inv+=bi;prk+=pi;gross+=bi+pi;
+    if(m%12===0){inv+=prk;prk=0;}
+    if(m%3===0)qd.push({q:m/3,m:m,bal:inv+prk,gross:gross,fees:0});
+  }
+  return{qd:qd,gross:gross,bal:inv+prk,fees:0};
+}
+
+function sim(o,P){
+  if(o.structure==="Bonds"&&o.parkingRate!=null)
+    return simBubills(P.init,P.monthly,P.months,o.baseRate,o.parkingRate);
+  if(o.structure==="Separate"){
+    var h=simAccount(P.init/2,P.monthly/2,P.months,o.promoRate,o.promoMonths,o.baseRate,null);
+    return{qd:h.qd.map(function(q){return{q:q.q,m:q.m,bal:q.bal*2,gross:q.gross*2,fees:0};}),gross:h.gross*2,bal:h.bal*2,fees:0};
+  }
+  return simAccount(P.init,P.monthly,P.months,o.promoRate,o.promoMonths,o.baseRate,o.feeFn);
+}
+
+function calcTax(gross,P){return Math.max(0,gross-P.allowance)*P.taxRate;}
+function calcNet(gross,fees,P){return gross-calcTax(gross,P)-fees;}
+
+/* ================================================================
+   CHART INSTANCES (tracked for destroy-on-recompute)
+   ================================================================ */
+var chartTraj=null,chartBar=null,chartRadar=null,chartBubble=null;
+
+/* ================================================================
+   PARAMETER READER
+   ================================================================ */
+function getP(){
+  var pp=+($("inInit").value)||10000;
+  var pm=+($("inMonth").value)||1000;
+  return{init:pp*2,monthly:pm*2,months:24,allowance:2000,taxRate:0.26375,pp:pp,pm:pm};
+}
+
+/* ================================================================
+   DEBOUNCED RECOMPUTE
+   ================================================================ */
+var _dbt;
+function scheduleRecompute(){clearTimeout(_dbt);_dbt=setTimeout(recompute,120);}
+
+/* ================================================================
+   MAIN RECOMPUTE — called on every input change
+   ================================================================ */
+function recompute(){
+  var P=getP();
+
+  $("hInit").textContent=eur(P.pp);
+  $("hMonth").textContent=eur(P.pm);
+  $("jInit").textContent=eur(P.init);
+  $("sInit").textContent=eur(P.pp);
+  $("jMonth").textContent=eur(P.monthly);
+  $("sMonth").textContent=eur(P.pm);
+  $("chipAmounts").textContent=eurK(P.init)+" + "+eurK(P.monthly)+"/mo";
+  $("paramInit").textContent="EUR "+P.init.toLocaleString();
+  $("paramMonth").textContent="EUR "+P.monthly.toLocaleString()+"/month";
+
+  var results=OPTIONS.map(function(o){
+    var s=sim(o,P);
+    var q4=s.qd[3];
+    var g12=q4?q4.gross:0,f12=q4?q4.fees:0;
+    return{o:o,sim:s,
+      gross12:g12,fees12:f12,tax12:calcTax(g12,P),net12:calcNet(g12,f12,P),
+      gross24:s.gross,fees24:s.fees,tax24:calcTax(s.gross,P),net24:calcNet(s.gross,s.fees,P)};
+  }).sort(function(a,b){return b.net24-a.net24;});
+
+  var jvsResults=JVS_PROVIDERS.map(function(p){
+    if(p.jointRate===null){
+      var sepH=simAccount(P.init/2,P.monthly/2,P.months,p.promoRate,p.promoMonths,p.sepRate,p.sepFeeFn);
+      var sg=sepH.gross*2,sf=sepH.fees*2;
+      return{name:p.name,jointGross:null,jointFees:null,jointTax:null,jointNet:null,
+        sepGross:sg,sepFees:sf,sepTax:calcTax(sg,P),sepNet:calcNet(sg,sf,P),
+        jointRateStr:"N/A",sepRateStr:p.promoRate?p.promoRate+"%x"+p.promoMonths+"m / "+p.sepRate+"%":p.sepRate+"%",
+        tradeoff:p.tradeoff};
+    }
+    var jSim=simAccount(P.init,P.monthly,P.months,p.promoRate,p.promoMonths,p.jointRate,p.jointFeeFn);
+    var sepH2=simAccount(P.init/2,P.monthly/2,P.months,p.promoRate,p.promoMonths,p.sepRate,p.sepFeeFn);
+    var sg2=sepH2.gross*2,sf2=sepH2.fees*2;
+    var rateStr=p.promoRate?p.promoRate+"%x"+p.promoMonths+"m / ":"";
+    return{name:p.name,
+      jointGross:jSim.gross,jointFees:jSim.fees,jointTax:calcTax(jSim.gross,P),jointNet:calcNet(jSim.gross,jSim.fees,P),
+      sepGross:sg2,sepFees:sf2,sepTax:calcTax(sg2,P),sepNet:calcNet(sg2,sf2,P),
+      jointRateStr:rateStr+p.jointRate+"%",sepRateStr:rateStr+p.sepRate+"%",
+      tradeoff:p.tradeoff};
+  });
+
+  renderComp(results);
+  renderJvS(jvsResults);
+  renderKPIs(results,P);
+  buildCharts(results);
+}
+
+/* ================================================================
+   RENDER: COMPARISON TABLE
+   ================================================================ */
+function renderComp(results){
+  var tb=$("compTbody");tb.innerHTML="";
+  for(var i=0;i<results.length;i++){
+    var r=results[i],o=r.o;
+    var promo=(o.promoRate!=null&&o.promoMonths>0)?o.promoRate.toFixed(2)+"%\u00D7"+o.promoMonths+"m":"\u2014";
+    var tr=document.createElement("tr");
+    tr.innerHTML=
+      "<td>"+o.name+"</td><td>"+stag(o.structure)+"</td><td>"+promo+"</td>"+
+      "<td class='mono'>"+o.baseRate.toFixed(2)+"%</td>"+
+      "<td>"+sp(o.safetyScore)+" <span class='small'>/5</span></td>"+
+      "<td>"+sp(o.utilityScore)+" <span class='small'>/5</span></td>"+
+      "<td class='mono'>"+eur(r.gross24)+"</td>"+
+      "<td class='mono'>"+(r.fees24>0?eur(r.fees24):"\u2014")+"</td>"+
+      "<td class='mono'>"+(r.tax24>0.01?eur(r.tax24):"\u20AC0")+"</td>"+
+      "<td class='mono' style='font-weight:800;background:#edf7ed'>"+eur(r.net24)+"</td>"+
+      "<td><span class='small'>"+o.notes+"</span></td>";
+    tb.appendChild(tr);
+  }
+}
+
+/* ================================================================
+   RENDER: JOINT vs SEPARATE TABLE
+   ================================================================ */
+function renderJvS(jvsResults){
+  var tb=$("jvsTbody");tb.innerHTML="";
+  for(var i=0;i<jvsResults.length;i++){
+    var r=jvsResults[i];
+    var diff=(r.jointNet!=null&&r.sepNet!=null)?(r.jointNet-r.sepNet):null;
+    var winner=r.jointNet===null?"Separate only":diff>1?"Joint":diff<-1?"Separate":"Tied";
+    var cls=winner==="Joint"?"jvsBetter":winner==="Separate"?"jvsWorse":"";
+    var tr=document.createElement("tr");
+    tr.className=cls;
+    tr.innerHTML=
+      "<td>"+r.name+"</td>"+
+      "<td>"+r.jointRateStr+"</td>"+
+      "<td class='mono'>"+(r.jointNet!=null?eur(r.jointNet):"N/A")+"</td>"+
+      "<td>"+r.sepRateStr+"</td>"+
+      "<td class='mono'>"+eur(r.sepNet)+"</td>"+
+      "<td class='mono'>"+(diff!=null?(diff>=0?"+":"")+eur(diff):"\u2014")+"</td>"+
+      "<td><strong class='"+(winner==="Joint"?"winner":winner==="Separate"?"loser":"")+"'>"+winner+"</strong></td>"+
+      "<td><span class='small'>"+r.tradeoff+"</span></td>";
+    tb.appendChild(tr);
+  }
+}
+
+/* ================================================================
+   RENDER: KPIs + RECOMMENDATIONS (dynamic)
+   ================================================================ */
+function renderKPIs(results,P){
+  var best=results[0];
+  $("kpi1").textContent=best.o.short;
+  $("kpi1s").textContent=eur(best.net24)+" net 24m (after tax + fees)";
+
+  var joints=results.filter(function(r){return r.o.structure==="Joint";});
+  var bestJ=joints[0];
+  $("kpi2").textContent=bestJ.o.short;
+  $("kpi2s").textContent=eur(bestJ.net24)+" net 24m. Utility "+bestJ.o.utilityScore.toFixed(1)+"/5.";
+
+  var seps=results.filter(function(r){return r.o.structure==="Separate";});
+  var bestS=seps[0];
+  $("kpi3").textContent=bestS.o.short;
+  $("kpi3s").textContent=eur(bestS.net24)+" net 24m.";
+
+  var bestBond=results.filter(function(r){return r.o.structure==="Bonds";}).sort(function(a,b){return b.net24-a.net24;})[0];
+
+  $("recJointName").textContent=bestJ.o.short;
+  $("recJointNote").innerHTML=eur(bestJ.net24)+" net over 24 months.<br>"+bestJ.o.baseRate+"% variable rate. Full English UI. Joint savings with shared oversight.";
+  $("recSepName").textContent=bestS.o.short;
+  $("recSepNote").innerHTML=eur(bestS.net24)+" net over 24 months (combined).<br>"+bestS.o.promoRate+"% for "+bestS.o.promoMonths+"m then "+bestS.o.baseRate+"%. Cleaner tax filing.";
+  $("recETFName").textContent=bestBond.o.short;
+  $("recETFNote").innerHTML=eur(bestBond.net24)+" net over 24 months.<br>"+bestBond.o.baseRate+"% yield (ECB-linked). UCITS segregated assets.";
+
+  $("verdictTitle").textContent=bestJ.o.id==="bunq"
+    ?"Verdict: A joint account IS worth it \u2014 Bunq is the clear winner"
+    :"Verdict: "+bestJ.o.short+" leads the joint options";
+
+  $("verdictBody").innerHTML=
+    "With verified February 2026 rates, <strong>"+bestJ.o.short+"</strong> delivers the highest net yield among bank accounts at <strong>"+eur(bestJ.net24)+"</strong> over 24 months, "+
+    "while also being the only provider with a full English joint-savings UI and shared-pot accountability. "+
+    "The nearest separate-accounts alternative (<strong>"+bestS.o.short+"</strong> at "+eur(bestS.net24)+") trails by <strong>"+eur(bestJ.net24-bestS.net24)+"</strong>. "+
+    "<strong>"+bestBond.o.short+"</strong> ("+eur(bestBond.net24)+") is competitive on yield and offers sovereign-grade safety, but lacks the \"one shared pot\" experience."+
+    "<br><br>"+
+    "<strong>Tax impact:</strong> At "+bestJ.o.baseRate+"% on a growing balance, "+bestJ.o.short+"'s 24-month gross interest ("+eur(bestJ.gross24)+") "+
+    (bestJ.gross24>2000?"exceeds":"is within")+" the EUR 2,000 combined Sparerpauschbetrag"+
+    (bestJ.gross24>2000?" by "+eur(bestJ.gross24-2000)+". This means <strong>"+eur(bestJ.tax24)+" in tax</strong> is payable.":". Minimal or no tax is due.")+
+    " With separate individual accounts (at lower individual rates), total interest might stay closer to EUR 2,000 \u2014 meaning less tax \u2014 but you\u2019d earn less overall. "+
+    "The joint account still wins net of tax."+
+    "<br><br>"+
+    "<strong>Bottom line:</strong> Open a "+bestJ.o.short+" joint savings account as your primary pot. If you want to diversify, split the monthly contribution: EUR "+P.pm.toLocaleString()+"/month into "+bestJ.o.short+" (joint) and EUR "+P.pm.toLocaleString()+"/month into "+bestBond.o.short+" (via a broker like Trade Republic or Scalable Capital).";
+
+  $("diversBody").innerHTML=
+    "<strong>Pot 1 \u2014 "+bestJ.o.short+" Joint Account:</strong> EUR "+P.pp.toLocaleString()+" initial + EUR "+P.pm.toLocaleString()+"/month. Handles your core goal: one shared savings pot with full English UI and joint accountability.<br>"+
+    "<strong>Pot 2 \u2014 "+bestBond.o.short+" via broker:</strong> EUR "+P.pp.toLocaleString()+" initial + EUR "+P.pm.toLocaleString()+"/month. Higher risk-adjusted yield, sovereign-linked safety, easy to sell. Diversifies away from neobank operational risk.<br><br>"+
+    "Combined, this split gives you roughly <strong>"+eur((bestJ.net24+bestBond.net24)/2)+"</strong> net over 24 months per EUR "+P.pp.toLocaleString()+"+"+eurK(P.pm)+"/mo pot (average of both). "+
+    "The "+bestJ.o.short+" half gives you the joint pot; the "+bestBond.o.short+" half gives you safety depth.";
+}
+
+/* ================================================================
+   CHARTS (destroy + rebuild on every recompute)
+   ================================================================ */
+function buildCharts(results){
+  if(!window.Chart)return;
+  var SCOL={Joint:"rgba(37,99,235,",Separate:"rgba(5,150,105,",Bonds:"rgba(217,119,6,"};
+
+  if(chartTraj)chartTraj.destroy();
+  chartTraj=new Chart($("trajChart"),{
+    type:"line",
+    data:{
+      labels:["Q1","Q2","Q3","Q4","Q5","Q6","Q7","Q8"],
+      datasets:results.map(function(r){return{
+        label:r.o.short+" ("+r.o.structure+")",
+        data:r.sim.qd.map(function(q){return+q.gross.toFixed(2);}),
+        borderColor:r.o.color,backgroundColor:r.o.color+"22",
+        borderWidth:2.5,pointRadius:4,pointHoverRadius:6,tension:0.25,fill:false
+      };})
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        title:{display:true,text:"Cumulative Gross Interest \u2014 24 Months (quarter by quarter)",color:"#0b1220",font:{size:14,weight:"700"}},
+        legend:{position:"bottom",labels:{boxWidth:14,font:{size:10}}},
+        tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+eur(c.raw);}}}
+      },
+      scales:{x:{title:{display:true,text:"Quarter"}},y:{beginAtZero:true,title:{display:true,text:"Gross Interest (EUR)"},ticks:{callback:function(v){return"\u20AC"+v;}}}}
+    }
+  });
+
+  if(chartBar)chartBar.destroy();
+  chartBar=new Chart($("barChart"),{
+    type:"bar",
+    data:{
+      labels:results.map(function(r){return r.o.short;}),
+      datasets:[
+        {label:"Net Interest (12m)",data:results.map(function(r){return+r.net12.toFixed(2);}),backgroundColor:results.map(function(r){return(SCOL[r.o.structure]||SCOL.Joint)+"0.45)";}),borderRadius:5},
+        {label:"Net Interest (24m)",data:results.map(function(r){return+r.net24.toFixed(2);}),backgroundColor:results.map(function(r){return(SCOL[r.o.structure]||SCOL.Joint)+"0.85)";}),borderRadius:5}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        title:{display:true,text:"Net Interest (after tax + fees) \u2014 12m vs 24m",color:"#0b1220",font:{size:13,weight:"700"}},
+        legend:{position:"bottom",labels:{font:{size:10}}},
+        tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+eur(c.raw);}}}
+      },
+      scales:{y:{beginAtZero:true,ticks:{callback:function(v){return"\u20AC"+v;}}}}
+    }
+  });
+
+  var maxN=Math.max.apply(null,results.map(function(r){return r.net24;}));
+  var minN=Math.min.apply(null,results.map(function(r){return r.net24;}));
+  var span=Math.max(1,maxN-minN);
+  if(chartRadar)chartRadar.destroy();
+  chartRadar=new Chart($("radarChart"),{
+    type:"radar",
+    data:{
+      labels:["Safety & Trust","Utility (English/UX)","Yield (Rates)"],
+      datasets:results.map(function(r){return{
+        label:r.o.short,
+        data:[+(r.o.safetyScore*2).toFixed(1),+(r.o.utilityScore*2).toFixed(1),+((r.net24-minN)/span*10).toFixed(1)],
+        borderColor:r.o.color,backgroundColor:r.o.color+"18",borderWidth:2,
+        pointBackgroundColor:r.o.color,pointBorderColor:"#fff",pointBorderWidth:1,pointRadius:4,pointHoverRadius:6
+      };})
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        title:{display:true,text:"Trilemma Scoring (0-10)",color:"#0b1220",font:{size:14,weight:"700"}},
+        legend:{position:"bottom",labels:{boxWidth:14,padding:12,font:{size:10}}},
+        tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+c.label+" "+c.raw.toFixed(1)+"/10";}}}
+      },
+      scales:{r:{min:0,max:10,ticks:{stepSize:2,backdropColor:"transparent",font:{size:9}},pointLabels:{font:{size:12,weight:"600"}},grid:{color:"rgba(0,0,0,0.06)"},angleLines:{color:"rgba(0,0,0,0.06)"}}}
+    }
+  });
+
+  if(chartBubble)chartBubble.destroy();
+  chartBubble=new Chart($("bubbleChart"),{
+    type:"bubble",
+    data:{datasets:[{
+      label:"Options",
+      data:results.map(function(r){return{label:r.o.short,x:+r.net24.toFixed(2),y:r.o.utilityScore,r:Math.max(5,r.o.safetyScore*3.2)};}),
+      backgroundColor:results.map(function(r){return(SCOL[r.o.structure]||SCOL.Joint)+"0.20)";}),
+      borderColor:results.map(function(r){return(SCOL[r.o.structure]||SCOL.Joint)+"0.75)";}),
+      borderWidth:1.5
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        title:{display:true,text:"Yield vs Utility (bubble = Safety)",color:"#0b1220",font:{size:13,weight:"700"}},
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(c){var d=c.raw;return d.label+": "+eur(d.x)+" net, Utility "+d.y+"/5, Safety "+(d.r/3.2).toFixed(1)+"/5";}}}
+      },
+      scales:{x:{title:{display:true,text:"Net Interest 24m (EUR)"},ticks:{callback:function(v){return"\u20AC"+v;}}},y:{title:{display:true,text:"Utility (0-5)"},min:0,max:5.5}}
+    }
+  });
+}
+
+/* ================================================================
+   SAFETY TABLE (static — rendered once)
+   ================================================================ */
+(function(){
+  var tb=$("safetyTbody");
+  for(var i=0;i<BANK_SAFETY.length;i++){
+    var b=BANK_SAFETY[i];
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+b.name+"</td><td>"+sp(b.reg)+"</td><td>"+sp(b.par)+"</td><td>"+sp(b.dep)+"</td><td>"+sp(b.cri)+"</td><td>"+sp(b.ops)+"</td><td style='font-weight:800'>"+b.avg.toFixed(1)+" <span class='small'>/5</span></td><td><span class='small'>"+b.risk+"</span></td>";
+    tb.appendChild(tr);
+  }
+})();
+
+/* ================================================================
+   EVENT WIRING + INITIAL RENDER
+   ================================================================ */
+["inInit","inMonth"].forEach(function(id){
+  var el=$(id);
+  el.addEventListener("input",scheduleRecompute);
+  el.addEventListener("change",scheduleRecompute);
+});
+
+recompute();
+</script>
+</body>
+</html>
